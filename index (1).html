@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Coin Game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%;
+      height: 100%;
+      background-color: #ffa726;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+    .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; justify-content: center; align-items: center; flex-direction: column; }
+    .active { display: flex !important; }
+    #coin-container img {
+      position: absolute;
+      cursor: pointer;
+    }
+    .shop-item {
+      display: inline-block;
+      text-align: center;
+      margin: 10px;
+    }
+    .top-right { position: absolute; top: 10px; right: 10px; color: white; font-size: 1.2em; }
+  </style>
+</head>
+<body>
+  <!-- Start Screen -->
+  <div id="start-screen" class="screen active">
+    <img src="your_title.gif" alt="Game Title">
+    <img src="your_start_button.gif" alt="Start Button" onclick="showInstructions()">
+  </div>
+
+  <!-- Instruction Screen -->
+  <div id="instruction-screen" class="screen">
+    <img src="your_instruction.gif" alt="Instructions">
+    <img src="your_start_game.gif" alt="Start Game" onclick="startGame()">
+  </div>
+
+  <!-- Coin Collection Screen -->
+  <div id="game-screen" class="screen">
+    <div class="top-right">
+      <img src="your_countdown.gif" alt="Countdown" style="height: 50px;">
+    </div>
+    <div id="coin-container"></div>
+    <audio id="coin-music" src="your_coin_music.mp3" autoplay loop></audio>
+  </div>
+
+  <!-- Shop Screen -->
+  <div id="shop-screen" class="screen">
+    <div class="top-right">Coins: <span id="coin-count">0</span></div>
+    <div class="shop-item">
+      <img src="your_tempelan.gif" onclick="buyItem('tempelan', 5)"><br>5 Coins
+    </div>
+    <div class="shop-item">
+      <img src="your_pinata.gif" onclick="buyItem('pinata', 8)"><br>8 Coins
+    </div>
+    <div class="shop-item">
+      <img src="your_balon.gif" onclick="buyItem('balon', 6)"><br>6 Coins
+    </div>
+    <button onclick="finishShopping()">Next</button>
+  </div>
+
+  <!-- Result Screen -->
+  <div id="result-screen" class="screen">
+    <img id="result-gif" src="">
+    <audio id="result-music" src="your_result_music.mp3" autoplay loop></audio>
+  </div>
+
+  <!-- Envelope Screen -->
+  <div id="envelope-screen" class="screen">
+    <img src="your_envelope.gif" onclick="showLetter()">
+  </div>
+
+  <!-- Final Letter Screen -->
+  <div id="letter-screen" class="screen">
+    <img src="your_letter.gif">
+  </div>
+
+  <script>
+    let coins = 0;
+    let items = [];
+
+    function showInstructions() {
+      document.getElementById('start-screen').classList.remove('active');
+      document.getElementById('instruction-screen').classList.add('active');
+    }
+
+    function startGame() {
+      document.getElementById('instruction-screen').classList.remove('active');
+      document.getElementById('game-screen').classList.add('active');
+      spawnCoins();
+      setTimeout(() => {
+        document.getElementById('coin-music').pause();
+        document.getElementById('game-screen').classList.remove('active');
+        document.getElementById('shop-screen').classList.add('active');
+        document.getElementById('coin-count').textContent = coins;
+      }, 30000);
+    }
+
+    function spawnCoins() {
+      const container = document.getElementById('coin-container');
+      const interval = setInterval(() => {
+        if (document.getElementById('game-screen').classList.contains('active')) {
+          const coin = document.createElement('img');
+          coin.src = 'your_coin.gif';
+          coin.style.top = Math.random() * 90 + '%';
+          coin.style.left = Math.random() * 90 + '%';
+          coin.onclick = () => {
+            coins++;
+            coin.remove();
+          }
+          container.appendChild(coin);
+          setTimeout(() => coin.remove(), 1500);
+        } else {
+          clearInterval(interval);
+        }
+      }, 500);
+    }
+
+    function buyItem(item, price) {
+      if (coins >= price) {
+        coins -= price;
+        items.push(item);
+        document.getElementById('coin-count').textContent = coins;
+      } else {
+        alert('Not enough coins!');
+      }
+    }
+
+    function finishShopping() {
+      document.getElementById('shop-screen').classList.remove('active');
+      document.getElementById('result-screen').classList.add('active');
+      document.getElementById('result-music').play();
+
+      let key = items.sort().join('-') || 'none';
+      let resultMap = {
+        'balon': 'result_balon.gif',
+        'pinata': 'result_pinata.gif',
+        'tempelan': 'result_tempelan.gif',
+        'balon-pinata': 'result_balon_pinata.gif',
+        'balon-tempelan': 'result_balon_tempelan.gif',
+        'pinata-tempelan': 'result_pinata_tempelan.gif',
+        'balon-pinata-tempelan': 'result_all.gif',
+        'none': 'result_none.gif'
+      };
+      document.getElementById('result-gif').src = resultMap[key] || 'result_none.gif';
+      setTimeout(() => {
+        document.getElementById('result-music').pause();
+        document.getElementById('result-screen').classList.remove('active');
+        document.getElementById('envelope-screen').classList.add('active');
+      }, 8000);
+    }
+
+    function showLetter() {
+      document.getElementById('envelope-screen').classList.remove('active');
+      document.getElementById('letter-screen').classList.add('active');
+    }
+  </script>
+</body>
+</html>
